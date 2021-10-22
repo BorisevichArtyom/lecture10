@@ -1,26 +1,56 @@
-
+package by.itacademy.javaenterprise;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.*;
+import java.util.Properties;
 
-public class TestConnectionDB {
+public class ConnectionThrowFile {
 
-    private static final String DB_PROPERTIES = "db.properties";
-    private static final String USER_PROPERTY = "xxx";
-    private static final String PASSWORD_PROPERTY = "xxx";
-    private static final String URL_PROPERTY = "jdbc:mysql://localhost:3306/Athlete_Diary?useSSL=false";
-    private static final String DRIVER_PROPERTY = "com.mysql.jdbc.Driver";
-    private static final String POOL_SIZE_PROPERTY = "poolsize";
-    private static final String TIMEOUT_PROPERTY = "timeout";
     private static final Logger logger = LoggerFactory.getLogger(
-            TestConnectionDB.class);
+            ConnectionThrowFile.class);
+    private Properties props = new Properties();
 
-    public static void setConnection() {
+    {
+        try (InputStream in = Files.newInputStream((Paths.get("src/main/resources/db.properties")))) {
+            props.load(in);
+        } catch (IOException e) {
+            logger.info("Error with reading File db.properties." + e);
+        }
+
+    }
+
+    private String url = props.getProperty("url");
+    private String username = props.getProperty("user");
+    private String password = props.getProperty("password");
+    private String driver = props.getProperty("driver");
+
+    public String getUrl() {
+        return url;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getDriver() {
+        return driver;
+    }
+
+    public void setConnection() {
         logger.info("Just a log message.");
+
         try {
-            Class.forName(DRIVER_PROPERTY);
+            Class.forName(driver);
 
         } catch (ClassNotFoundException e) {
             logger.error("Can't get class. No driver found.", e);
@@ -28,7 +58,7 @@ public class TestConnectionDB {
 
         Connection connection = null;
         try {
-            connection = DriverManager.getConnection(URL_PROPERTY, USER_PROPERTY, PASSWORD_PROPERTY);
+            connection = DriverManager.getConnection(url, username, password);
             logger.info("Connection to Athlete_Diary succesfull!");
         } catch (SQLException e) {
             logger.error("Can't get connection. Incorrect URL" + e);
@@ -68,9 +98,8 @@ public class TestConnectionDB {
 
 
     public static void main(String[] args) {
-        setConnection();
+        ConnectionThrowFile connectionThrowFile = new ConnectionThrowFile();
+        connectionThrowFile.setConnection();
 
     }
-
 }
-
